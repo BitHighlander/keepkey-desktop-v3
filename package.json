@@ -1,0 +1,67 @@
+{
+  "name": "keepKey",
+  "version": "0.0.1",
+  "main": "dist-electron/main/index.js",
+  "description": "The primary application for manging your KeepKey device.",
+  "author": "Highlander",
+  "license": "MIT",
+  "private": true,
+  "debug": {
+    "env": {
+      "VITE_DEV_SERVER_URL": "http://127.0.0.1:7777/"
+    }
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build && electron-builder",
+    "preview": "vite preview",
+    "pree2e": "vite build --mode=test",
+    "e2e": "playwright test",
+    "rebuild": "electron-rebuild -f -w bcrypt"
+  },
+  "dependencies": {
+    "@cosmjs/amino": "^0.31.3",
+    "@cosmjs/proto-signing": "^0.31.3",
+    "@json-rpc-tools/utils": "^1.7.6",
+    "@kadena/cryptography-utils": "^0.4.0",
+    "@multiversx/sdk-core": "^12.11.0",
+    "@multiversx/sdk-wallet": "^4.2.0",
+    "@polkadot/keyring": "^12.5.1",
+    "@polkadot/types": "^10.10.1",
+    "@polkadot/util-crypto": "^12.5.1",
+    "@solana/web3.js": "^1.87.3",
+    "@taquito/signer": "^17.3.2",
+    "@taquito/taquito": "^17.3.2",
+    "@walletconnect/web3wallet": "^1.9.3",
+    "bcrypt": "^5.1.1",
+    "bcryptjs": "^2.4.3",
+    "bcrypto": "^5.4.0",
+    "better-sqlite3": "^9.0.0",
+    "electron-updater": "^6.1.4",
+    "ethers": "^6.8.0",
+    "lokijs": "^1.5.12",
+    "near-api-js": "^2.1.4",
+    "solana-wallet": "^1.0.2",
+    "tronweb": "^5.3.1"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.39.0",
+    "@types/react": "^18.2.33",
+    "@types/react-dom": "^18.2.14",
+    "@vitejs/plugin-react": "^4.1.0",
+    "autoprefixer": "^10.4.16",
+    "electron": "^26.4.2",
+    "electron-builder": "^24.6.4",
+    "postcss": "^8.4.31",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "tailwindcss": "^3.3.5",
+    "typescript": "^5.2.2",
+    "vite": "^4.5.0",
+    "vite-plugin-electron": "0.13.0-beta.3",
+    "vite-plugin-electron-renderer": "^0.14.5"
+  },
+  "engines": {
+    "node": "^14.18.0 || >=16.0.0"
+  }
+}
