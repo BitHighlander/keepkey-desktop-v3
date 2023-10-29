@@ -12,6 +12,7 @@
     }
   },
   "scripts": {
+    "pnpm": "pnpm i",
     "dev": "vite",
     "build": "tsc && vite build && electron-builder",
     "preview": "vite preview",
@@ -20,8 +21,11 @@
     "rebuild": "electron-rebuild -f -w bcrypt"
   },
   "dependencies": {
+    "@chakra-ui/react": "^2.8.1",
     "@cosmjs/amino": "^0.31.3",
     "@cosmjs/proto-signing": "^0.31.3",
+    "@emotion/react": "^11.11.1",
+    "@emotion/styled": "^11.11.0",
     "@json-rpc-tools/utils": "^1.7.6",
     "@kadena/cryptography-utils": "^0.4.0",
     "@multiversx/sdk-core": "^12.11.0",
@@ -39,8 +43,10 @@
     "better-sqlite3": "^9.0.0",
     "electron-updater": "^6.1.4",
     "ethers": "^6.8.0",
+    "framer-motion": "^10.16.4",
     "lokijs": "^1.5.12",
     "near-api-js": "^2.1.4",
+    "react-hot-toast": "^2.4.1",
     "solana-wallet": "^1.0.2",
     "tronweb": "^5.3.1"
   },

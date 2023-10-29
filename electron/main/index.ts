@@ -3,6 +3,13 @@ import { release } from 'node:os'
 import { join } from 'node:path'
 import { update } from './update'
 import { initializeWallets } from './walletconnect/index'
+import useWalletConnectEventsManager from './walletconnect/events'
+
+/*
+  Wallet Connect
+ */
+import { web3wallet } from './walletconnect/utils/WalletConnectUtil'
+
 // The built directory structure
 //
 // ├─┬ dist-electron
@@ -124,12 +131,51 @@ ipcMain.handle('open-win', (_, arg) => {
 
  */
 
-let onStart = async function(){
+// let onStart = async function(){
+//   try{
+//     console.log("STARTING UP")
+//     const initialized = await initializeWallets()
+//
+//   }catch(e){
+//     console.error(e)
+//   }
+// }
+// onStart()
+
+//perform_skill_by_id
+ipcMain.on('onStart', async (event, message) => {
   try{
     console.log("STARTING UP")
-    initializeWallets()
+    const initialized = await initializeWallets()
+    useWalletConnectEventsManager(initialized, event)
   }catch(e){
-    console.error(e)
+    console.error("e: ",e)
   }
-}
-onStart()
+});
+
+
+
+/*
+    IPC
+    Functions Provided to the Renderer
+ */
+
+//perform_skill_by_id
+// ipcMain.on('pair', async (event, message) => {
+//     console.log("PAIR", message)
+//     let uri = message
+//     console.log("web3wallet", web3wallet)
+//     if(web3wallet){
+//       web3wallet.pair({ uri })
+//       //event.reply('asynchronous-reply', 'pong')
+//     }
+//
+//     event.reply('pair', message)
+// });
+
+
+/*
+    events
+ */
+
+//open session

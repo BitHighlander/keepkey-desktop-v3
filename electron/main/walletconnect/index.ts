@@ -14,7 +14,7 @@ import { createWeb3Wallet, web3wallet } from './utils/WalletConnectUtil';
 
 export async function initializeWallets(relayerRegionURL = '') {
     try {
-        let seed = "alcohol woman abuse must during monitor noble actual mixed trade anger aisle"
+        let seed = process.env['WALLET_TEST_SEED'] || "alcohol woman abuse must during monitor noble actual mixed trade anger aisle"
         const { eip155Addresses } = createOrRestoreEIP155Wallet(seed);
         // const { cosmosAddresses } = await createOrRestoreCosmosWallet();
         // const { solanaAddresses } = await createOrRestoreSolanaWallet();

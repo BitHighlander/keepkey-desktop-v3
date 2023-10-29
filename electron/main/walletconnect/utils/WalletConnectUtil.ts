@@ -4,7 +4,7 @@ export let web3wallet: IWeb3Wallet
 
 export async function createWeb3Wallet(relayerRegionURL: string) {
   const core = new Core({
-    projectId: process.env.NEXT_PUBLIC_PROJECT_ID,
+    projectId: "14d36ca1bc76a70273d44d384e8475ae",
     relayUrl: relayerRegionURL ?? process.env.NEXT_PUBLIC_RELAY_URL
   })
   web3wallet = await Web3Wallet.init({
@@ -20,7 +20,7 @@ export async function createWeb3Wallet(relayerRegionURL: string) {
   try {
     const clientId = await web3wallet.engine.signClient.core.crypto.getClientId()
     console.log('WalletConnect ClientID: ', clientId)
-    localStorage.setItem('WALLETCONNECT_CLIENT_ID', clientId)
+    //localStorage.setItem('WALLETCONNECT_CLIENT_ID', clientId)
   } catch (error) {
     console.error('Failed to set WalletConnect clientId in localStorage: ', error)
   }
