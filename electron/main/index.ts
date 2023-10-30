@@ -1,14 +1,23 @@
+require("dotenv").config()
+require("dotenv").config({path:'./../.env'})
+require("dotenv").config({path:'./../../.env'})
+require("dotenv").config({path:'./../../../.env'})
+require("dotenv").config({path:'./../../../../.env'})
+
 import { app, BrowserWindow, shell, ipcMain } from 'electron'
 import { release } from 'node:os'
 import { join } from 'node:path'
 import { update } from './update'
-import { initializeWallets } from './walletconnect/index'
-import useWalletConnectEventsManager from './walletconnect/events'
 
 /*
   Wallet Connect
  */
+import { initializeWallets } from './walletconnect/index'
+import useWalletConnectEventsManager from './walletconnect/events'
 import { web3wallet } from './walletconnect/utils/WalletConnectUtil'
+import { EIP155_SIGNING_METHODS } from './walletconnect/data/EIP155Data'
+import { approveEIP155Request, rejectEIP155Request } from './walletconnect/utils/EIP155RequestHandlerUtil'
+//end WC
 
 // The built directory structure
 //
@@ -166,6 +175,74 @@ ipcMain.on('rejectSession', async (event, message) => {
   try{
     console.log("rejectSession", message)
     await web3wallet.rejectSession(message)
+  }catch(e){
+    console.error("e: ",e)
+  }
+});
+
+
+ipcMain.on('approveSessionRequest', async (event, message) => {
+  try{
+    console.log("approveSessionRequest", message)
+    console.log("approveSessionRequest", message.requestEvent)
+    const { topic, params, verifyContext } = message.requestEvent
+    console.log("topic: ", topic)
+    console.log("params: ", params)
+    console.log("verifyContext: ", verifyContext)
+    const { request } = params
+    console.log("request", request)
+    //types of messages
+    switch (request.method) {
+      case EIP155_SIGNING_METHODS.ETH_SIGN:
+      case EIP155_SIGNING_METHODS.PERSONAL_SIGN:
+      case EIP155_SIGNING_METHODS.ETH_SIGN_TYPED_DATA:
+      case EIP155_SIGNING_METHODS.ETH_SIGN_TYPED_DATA_V3:
+      case EIP155_SIGNING_METHODS.ETH_SIGN_TYPED_DATA_V4:
+      case EIP155_SIGNING_METHODS.ETH_SEND_TRANSACTION:
+      case EIP155_SIGNING_METHODS.ETH_SIGN_TRANSACTION:
+        const response = await approveEIP155Request(message.requestEvent)
+        console.log("response: ",response)
+        await web3wallet.respondSessionRequest({
+          topic,
+          response
+        })
+        return true
+      default:
+        console.error("Unhandled event type! "+request.method)
+        return false
+    }
+
+  }catch(e){
+    console.error("e: ",e)
+  }
+});
+
+ipcMain.on('rejectSessionRequest', async (event, message) => {
+  try{
+    console.log("rejectSessionRequest", message)
+    console.log("rejectSessionRequest", message.requestEvent)
+    const { topic, params, verifyContext } = message.requestEvent
+    const { request } = params
+    //types of messages
+    switch (request.method) {
+      case EIP155_SIGNING_METHODS.ETH_SIGN:
+      case EIP155_SIGNING_METHODS.PERSONAL_SIGN:
+      case EIP155_SIGNING_METHODS.ETH_SIGN_TYPED_DATA:
+      case EIP155_SIGNING_METHODS.ETH_SIGN_TYPED_DATA_V3:
+      case EIP155_SIGNING_METHODS.ETH_SIGN_TYPED_DATA_V4:
+      case EIP155_SIGNING_METHODS.ETH_SEND_TRANSACTION:
+      case EIP155_SIGNING_METHODS.ETH_SIGN_TRANSACTION:
+        const response = await rejectEIP155Request(message.requestEvent)
+        await web3wallet.respondSessionRequest({
+          topic,
+          response
+        })
+        return true
+      default:
+        console.error("Unhandled event type! "+request.method)
+        return false
+    }
+
   }catch(e){
     console.error("e: ",e)
   }

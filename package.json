@@ -42,6 +42,7 @@
     "bcryptjs": "^2.4.3",
     "bcrypto": "^5.4.0",
     "better-sqlite3": "^9.0.0",
+    "dotenv": "^16.3.1",
     "electron-updater": "^6.1.4",
     "ethers": "^6.8.0",
     "framer-motion": "^10.16.4",

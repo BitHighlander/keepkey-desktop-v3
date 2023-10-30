@@ -8,7 +8,7 @@ import {
 import { formatJsonRpcError, formatJsonRpcResult } from '@json-rpc-tools/utils'
 import { SignClientTypes } from '@walletconnect/types'
 import { getSdkError } from '@walletconnect/utils'
-import { providers } from 'ethers'
+import { ethers } from 'ethers'
 type RequestEventArgs = Omit<SignClientTypes.EventArguments['session_request'], 'verifyContext'>
 export async function approveEIP155Request(requestEvent: RequestEventArgs) {
   const { params, id } = requestEvent
@@ -45,7 +45,7 @@ export async function approveEIP155Request(requestEvent: RequestEventArgs) {
 
     case EIP155_SIGNING_METHODS.ETH_SEND_TRANSACTION:
       try {
-        const provider = new providers.JsonRpcProvider(EIP155_CHAINS[chainId as TEIP155Chain].rpc)
+        const provider = new ethers.JsonRpcProvider(EIP155_CHAINS[chainId as TEIP155Chain].rpc)
         const sendTransaction = request.params[0]
         const connectedWallet = wallet.connect(provider)
         const { hash } = await connectedWallet.sendTransaction(sendTransaction)
