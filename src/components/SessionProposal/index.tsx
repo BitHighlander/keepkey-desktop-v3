@@ -3,8 +3,9 @@
  */
 
 import { Fragment, useCallback, useMemo } from 'react'
-import { Box, Flex, Text, Grid, GridItem } from "@chakra-ui/react";
+import { Box, Flex, Text, Grid, GridItem, Button } from "@chakra-ui/react";
 import { CheckIcon, CloseIcon } from "@chakra-ui/icons";
+import { buildApprovedNamespaces, getSdkError } from '@walletconnect/utils'
 
 import ProjectInfoCard from '@/components/ProjectInfoCard'
 import { EIP155_CHAINS, EIP155_SIGNING_METHODS } from '@/data/EIP155Data'
@@ -12,7 +13,7 @@ import ChainDataMini from '@/components/ChainDataMini'
 import ChainAddressMini from '@/components/ChainAddressMini'
 import { getChainData } from '@/data/chainsUtil'
 // import VerifyInfobox from '@/components/VerifyInfobox'
-
+const { ipcRenderer } = require('electron');
 
 export default function SessionProposalModal({proposal, eip155Addresses, onClose}: any) {
 
@@ -214,14 +215,15 @@ export default function SessionProposalModal({proposal, eip155Addresses, onClose
             console.log('approving namespaces:', namespaces)
 
             try {
-                //TODO hit backend
-                // await web3wallet.approveSession({
-                //     id,
-                //     relayProtocol: relays[0].protocol,
-                //     namespaces
-                // })
+                ipcRenderer.send('approveSession', {
+                    id,
+                    relayProtocol: relays[0].protocol,
+                    namespaces
+                });
+                onClose()
             } catch (e) {
-                styledToast((e as Error).message, 'error')
+                console.error(e)
+                //styledToast((e as Error).message, 'error')
                 return
             }
         }
@@ -231,13 +233,15 @@ export default function SessionProposalModal({proposal, eip155Addresses, onClose
     async function onReject() {
         if (proposal) {
             try {
-                //TODO hit backend
-                // await web3wallet.rejectSession({
-                //     id,
-                //     reason: getSdkError('USER_REJECTED_METHODS')
-                // })
+                console.log("Rejected Prop")
+                ipcRenderer.send('rejectSession', {
+                    id,
+                    reason: getSdkError('USER_REJECTED_METHODS')
+                });
+                onClose()
             } catch (e) {
-                styledToast((e as Error).message, 'error')
+                console.error(e)
+                //styledToast((e as Error).message, 'error')
                 return
             }
         }
@@ -295,6 +299,16 @@ export default function SessionProposalModal({proposal, eip155Addresses, onClose
                         })}
                 </GridItem>
             </Grid>
+            <Button
+                onClick={onApprove}
+            >
+                Approve
+            </Button>
+            <Button
+                onClick={onReject}
+            >
+                onReject
+            </Button>
         </Box>
     )
 }

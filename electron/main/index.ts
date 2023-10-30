@@ -153,7 +153,23 @@ ipcMain.on('onStart', async (event, message) => {
   }
 });
 
+ipcMain.on('approveSession', async (event, message) => {
+  try{
+    console.log("approveSession", message)
+    await web3wallet.approveSession(message)
+  }catch(e){
+    console.error("e: ",e)
+  }
+});
 
+ipcMain.on('rejectSession', async (event, message) => {
+  try{
+    console.log("rejectSession", message)
+    await web3wallet.rejectSession(message)
+  }catch(e){
+    console.error("e: ",e)
+  }
+});
 
 /*
     IPC
