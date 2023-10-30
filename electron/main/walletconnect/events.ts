@@ -1,6 +1,6 @@
 import { Web3WalletTypes } from '@walletconnect/web3wallet'
 // import { COSMOS_SIGNING_METHODS } from './data/COSMOSData'
-// import { EIP155_SIGNING_METHODS } from './data/EIP155Data'
+import { EIP155_SIGNING_METHODS } from './data/EIP155Data'
 // import { SOLANA_SIGNING_METHODS } from './data/SolanaData'
 // import { POLKADOT_SIGNING_METHODS } from './data/PolkadotData'
 // import { MULTIVERSX_SIGNING_METHODS } from './data/MultiversxData'
@@ -23,7 +23,7 @@ export default function useWalletConnectEventsManager(initialized: boolean, even
 
     const onSessionProposal = (proposal:any) => {
         console.log("onSessionProposal: ", proposal);
-        events.sender.send('session_proposal_open', { proposal });
+        events.sender.send('onSessionProposal', { proposal });
     };
 
     /******************************************************************************
@@ -119,20 +119,23 @@ export default function useWalletConnectEventsManager(initialized: boolean, even
             const { topic, params, verifyContext } = requestEvent
             const { request } = params
             console.log("request.method: ", request.method);
-            // switch (request.method) {
-            //     case EIP155_SIGNING_METHODS.ETH_SIGN:
-            //     case EIP155_SIGNING_METHODS.PERSONAL_SIGN:
-            //         return events.sender.send('SessionSignModal', { requestEvent, requestSession })
-            //
-            //     case EIP155_SIGNING_METHODS.ETH_SIGN_TYPED_DATA:
-            //     case EIP155_SIGNING_METHODS.ETH_SIGN_TYPED_DATA_V3:
-            //     case EIP155_SIGNING_METHODS.ETH_SIGN_TYPED_DATA_V4:
-            //         return events.sender.send('SessionSignTypedDataModal', { requestEvent, requestSession })
-            //
-            //     case EIP155_SIGNING_METHODS.ETH_SEND_TRANSACTION:
-            //     case EIP155_SIGNING_METHODS.ETH_SIGN_TRANSACTION:
-            //         return events.sender.send('SessionSendTransactionModal', { requestEvent, requestSession })
-            //
+
+            const requestSession = web3wallet.engine.signClient.session.get(topic)
+            
+            switch (request.method) {
+                case EIP155_SIGNING_METHODS.ETH_SIGN:
+                case EIP155_SIGNING_METHODS.PERSONAL_SIGN:
+                    return events.sender.send('SessionSignModal', { requestEvent, requestSession })
+
+                case EIP155_SIGNING_METHODS.ETH_SIGN_TYPED_DATA:
+                case EIP155_SIGNING_METHODS.ETH_SIGN_TYPED_DATA_V3:
+                case EIP155_SIGNING_METHODS.ETH_SIGN_TYPED_DATA_V4:
+                    return events.sender.send('SessionSignTypedDataModal', { requestEvent, requestSession })
+
+                case EIP155_SIGNING_METHODS.ETH_SEND_TRANSACTION:
+                case EIP155_SIGNING_METHODS.ETH_SIGN_TRANSACTION:
+                    return events.sender.send('SessionSendTransactionModal', { requestEvent, requestSession })
+
             //     case COSMOS_SIGNING_METHODS.COSMOS_SIGN_DIRECT:
             //     case COSMOS_SIGNING_METHODS.COSMOS_SIGN_AMINO:
             //         return events.sender.send('SessionSignCosmosModal', { requestEvent, requestSession })
@@ -179,9 +182,9 @@ export default function useWalletConnectEventsManager(initialized: boolean, even
             //     case KADENA_SIGNING_METHODS.KADENA_SIGN:
             //     case KADENA_SIGNING_METHODS.KADENA_QUICKSIGN:
             //         return events.sender.send('SessionSignKadenaModal', { requestEvent, requestSession })
-            //     default:
-            //         return events.sender.send('SessionUnsuportedMethodModal', { requestEvent, requestSession })
-            // }
+                default:
+                    return events.sender.send('SessionUnsuportedMethodModal', { requestEvent, requestSession })
+            }
     };
 
     /******************************************************************************

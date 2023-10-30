@@ -22,6 +22,7 @@ import {
 } from '@chakra-ui/react';
 import { useState, useEffect } from 'react';
 import UpdateElectron from '@/components/update'
+import SessionProposal from '@/components/SessionProposal'
 import logoVite from './assets/logo-vite.svg'
 import logoElectron from './assets/logo-electron.svg'
 import { ChakraProvider, useColorMode } from "@chakra-ui/react";
@@ -34,8 +35,11 @@ function App() {
   const [count, setCount] = useState(0)
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [modalType, setModalType] = useState(null);
-    const [pairingCode, setPairingCode] = useState('');
-    const [isPairingCodeValid, setIsPairingCodeValid] = useState(false);
+  const [pairingCode, setPairingCode] = useState('');
+  const [proposal, setProposal] = useState(null);
+  const [eip155Addresses, setEip155Addresses] = useState(null);
+  const [addresses, setAddresses] = useState(null);
+  const [isPairingCodeValid, setIsPairingCodeValid] = useState(false);
 
     const handlePairingCodeChange = (event: { target: { value: any; }; }) => {
         const { value } = event.target;
@@ -62,20 +66,24 @@ function App() {
   
     const onStart = async function () {
         try {
+
+
+            ipcRenderer.on('onWalletStart', (event, message) => {
+                console.log("onWalletStart message: ",message);
+                if(!message.eip155Addresses) throw Error("Invalid onWalletStart")
+                setEip155Addresses(message.eip155Addresses);
+            });
+
+            ipcRenderer.on('onSessionProposal', (event, message) => {
+                console.log("onSessionProposal message: ",message);
+                if(!message.proposal) throw Error("Invalid onSessionProposal")
+                setProposal(message.proposal);
+                openModal('onSessionProposal');
+            });
+
             // eslint-disable-next-line no-console
             console.log("onStart())");
-            // ipcRenderer.on('result-from-main', (event, message) => {
-            //     console.log("message: ",message);
-            //     //@ts-ignore
-            //     setMessages([...messages, { text: message, sender: 'agent' }]);
-            // });
             ipcRenderer.send('onStart');
-
-            // ipcRenderer.on('onStart', (event, message) => {
-            //     console.log("message: ",message);
-            // });
-
-
         } catch (e) {
             // eslint-disable-next-line no-console
             console.error(e);
@@ -119,9 +127,10 @@ function App() {
                                 </Button>
                             </div>
                         )}
-                        {modalType === 'Select Outbound' && (
+                        {modalType === 'onSessionProposal' && (
                             <div>
-
+                                onSessionProposal
+                                <SessionProposal proposal={proposal} eip155Addresses={eip155Addresses} onClose={onClose}/>
                             </div>
                         )}
                         {modalType === 'Confirm Trade' && (
@@ -144,6 +153,8 @@ function App() {
                 </a>
             </div>
             <h1>KeepKey Desktop</h1>
+            <br />
+            eip155Addresses: {eip155Addresses}
             <br/>
             <Button onClick={() => {openModal('Connect')}}>Connect</Button>
             <br/>

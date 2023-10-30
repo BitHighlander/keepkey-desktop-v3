@@ -146,7 +146,7 @@ ipcMain.handle('open-win', (_, arg) => {
 ipcMain.on('onStart', async (event, message) => {
   try{
     console.log("STARTING UP")
-    const initialized = await initializeWallets()
+    const initialized = await initializeWallets(event)
     useWalletConnectEventsManager(initialized, event)
   }catch(e){
     console.error("e: ",e)
