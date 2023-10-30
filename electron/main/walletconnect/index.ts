@@ -1,3 +1,5 @@
+require("dotenv").config({path:'../../.env'})
+
 // walletInitialization.js
 import { ipcMain } from 'electron'
 // import { createOrRestoreCosmosWallet } from './utils/CosmosWalletUtil';
@@ -16,7 +18,11 @@ export async function initializeWallets(event:any) {
     try {
         let relayerRegionURL = ''
         let seed = process.env['WALLET_TEST_SEED'] || "alcohol woman abuse must during monitor noble actual mixed trade anger aisle"
+        console.log(seed)
         const { eip155Addresses } = createOrRestoreEIP155Wallet(seed);
+        
+        
+        
         // const { cosmosAddresses } = await createOrRestoreCosmosWallet();
         // const { solanaAddresses } = await createOrRestoreSolanaWallet();
         // const { polkadotAddresses } = await createOrRestorePolkadotWallet();

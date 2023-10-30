@@ -47,6 +47,7 @@
     "framer-motion": "^10.16.4",
     "lokijs": "^1.5.12",
     "near-api-js": "^2.1.4",
+    "react-code-blocks": "^0.1.4",
     "react-hot-toast": "^2.4.1",
     "solana-wallet": "^1.0.2",
     "tronweb": "^5.3.1"
