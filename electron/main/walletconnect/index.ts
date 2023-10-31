@@ -14,15 +14,23 @@ import { createWeb3Wallet, web3wallet } from './utils/WalletConnectUtil';
 // import { createOrRestoreKadenaWallet } from './utils/KadenaWalletUtil';
 
 
-export async function initializeWallets(event:any) {
+export async function initializeWallets(event:any, wallets:any) {
     try {
         let relayerRegionURL = ''
-        let seed = process.env['WALLET_TEST_SEED'] || "alcohol woman abuse must during monitor noble actual mixed trade anger aisle"
-        console.log(seed)
-        const { eip155Addresses } = createOrRestoreEIP155Wallet(seed);
-        
-        
-        
+        // let seed = process.env['WALLET_TEST_SEED'] || "alcohol woman abuse must during monitor noble actual mixed trade anger aisle"
+        // console.log(seed)
+        // const { eip155Addresses } = createOrRestoreEIP155Wallet(seed);
+
+        let addressInfo = {
+            addressNList: [2147483692, 2147483708, 2147483648, 0, 0],
+            coin: 'Ethereum',
+            scriptType: 'ethereum',
+            showDisplay: false
+        }
+
+        //get eth address
+        let result = await wallets[0].ethGetAddress(addressInfo);
+        console.log("result: ", result)
         // const { cosmosAddresses } = await createOrRestoreCosmosWallet();
         // const { solanaAddresses } = await createOrRestoreSolanaWallet();
         // const { polkadotAddresses } = await createOrRestorePolkadotWallet();
@@ -31,6 +39,8 @@ export async function initializeWallets(event:any) {
         // const { tronAddresses } = await createOrRestoreTronWallet();
         // const { tezosAddresses } = await createOrRestoreTezosWallet();
         // const { kadenaAddresses } = await createOrRestoreKadenaWallet();
+
+        let eip155Addresses = [result]
 
         // Instead of setting the addresses in a store, you might return them, log them,
         // or use them in some other way that makes sense for your Node.js application.
@@ -50,7 +60,7 @@ export async function initializeWallets(event:any) {
         event.reply('onWalletStart', message)
         
         await createWeb3Wallet(relayerRegionURL);
-
+        console.log("relayerRegionURL: ", relayerRegionURL)
         // Restart transport if relayer region changes
         web3wallet.core.relayer.restartTransport(relayerRegionURL);
 

@@ -15,7 +15,7 @@ import { getChainData } from '@/data/chainsUtil'
 // import VerifyInfobox from '@/components/VerifyInfobox'
 const { ipcRenderer } = require('electron');
 
-export default function SessionProposalModal({proposal, eip155Addresses, onClose}: any) {
+export default function SessionProposalModal({proposal, eip155Addresses, pairingCode, onClose}: any) {
 
     const supportedNamespaces = useMemo(() => {
         // eip155
@@ -217,6 +217,7 @@ export default function SessionProposalModal({proposal, eip155Addresses, onClose
             try {
                 ipcRenderer.send('approveSession', {
                     id,
+                    pairingCode,
                     relayProtocol: relays[0].protocol,
                     namespaces
                 });

@@ -38,6 +38,7 @@ function App() {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [modalType, setModalType] = useState(null);
   const [pairingCode, setPairingCode] = useState('');
+  const [sessions, setAllSessions] = useState(null);
   const [proposal, setProposal] = useState(null);
   const [requestEvent, setRequestEvent] = useState(null);
   const [requestSession, setRequestSession] = useState(null);
@@ -144,7 +145,7 @@ function App() {
                         {modalType === 'onSessionProposal' && (
                             <div>
                                 onSessionProposal
-                                <SessionProposal proposal={proposal} eip155Addresses={eip155Addresses} onClose={onClose}/>
+                                <SessionProposal proposal={proposal} eip155Addresses={eip155Addresses} pairingCode={pairingCode} onClose={onClose}/>
                             </div>
                         )}
                         {modalType === 'onSessionRequest' && (

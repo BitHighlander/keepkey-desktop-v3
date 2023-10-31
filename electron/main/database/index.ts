@@ -39,6 +39,58 @@ export interface Pubkey {
     balances: Balance[];
 }
 
+interface SessionData {
+    relay: {
+        protocol: string;
+    };
+    namespaces: {
+        eip155: {
+            chains: string[];
+            methods: string[];
+            events: string[];
+            accounts: string[];
+        };
+    };
+    requiredNamespaces: {
+        eip155: {
+            chains: string[];
+            methods: string[];
+            events: string[];
+            rpcMap: { [key: string]: any };
+        };
+    };
+    optionalNamespaces: {
+        eip155: {
+            chains: string[];
+            methods: string[];
+            events: string[];
+            rpcMap: { [key: string]: any };
+        };
+    };
+    pairingTopic: string;
+    controller: string;
+    expiry: number;
+    topic: string;
+    acknowledged: boolean;
+    self: {
+        publicKey: string;
+        metadata: {
+            name: string;
+            description: string;
+            url: string;
+            icons: string[];
+        };
+    };
+    peer: {
+        publicKey: string;
+        metadata: {
+            description: string;
+            url: string;
+            icons: string[];
+            name: string;
+        };
+    };
+}
 
 // Create the pubkeys, balances, caips, and sessions tables
 db.serialize(() => {
@@ -77,8 +129,75 @@ db.serialize(() => {
             balance REAL NOT NULL
         )
   `);
+
+    db.run(`
+      CREATE TABLE IF NOT EXISTS sessions (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        sessionData TEXT NOT NULL
+      )
+    `);
 });
 
+// export interface Session {
+//     id?: number; // Optional ID field for database storage
+//     sessionData: SessionData;
+// }
+// Function to delete sessions by topic
+
+function deleteSessionsByTopic(topic: string) {
+    return new Promise<void>((resolve, reject) => {
+        db.run(
+            'DELETE FROM sessions WHERE sessionData LIKE ?',
+            [`%"topic":"${topic}"%`], // Match the topic within the sessionData JSON
+            function (err) {
+                if (err) {
+                    console.error('Error deleting sessions by topic:', err.message);
+                    reject(err);
+                } else {
+                    console.log('Sessions deleted successfully for topic:', topic);
+                    resolve();
+                }
+            }
+        );
+    });
+}
+
+// Function to store a session
+function storeSession(session: SessionData) {
+    return new Promise<void>((resolve, reject) => {
+        db.run(
+            'INSERT INTO sessions (sessionData) VALUES (?)',
+            [JSON.stringify(session)],
+            function (err) {
+                if (err) {
+                    console.error('Error storing session:', err.message);
+                    reject(err);
+                } else {
+                    console.log('Session stored successfully with ID:', this.lastID);
+                    resolve();
+                }
+            }
+        );
+    });
+}
+
+// Function to retrieve all sessions
+function getAllSessions() {
+    return new Promise<Session[]>((resolve, reject) => {
+        db.all('SELECT * FROM sessions', function (err, rows) {
+            if (err) {
+                console.error('Error retrieving sessions:', err.message);
+                reject(err);
+            } else {
+                const sessions = rows.map((row) => ({
+                    id: row.id,
+                    sessionData: JSON.parse(row.sessionData),
+                }));
+                resolve(sessions);
+            }
+        });
+    });
+}
 
 // Function to store a pubkey
 function storePubkey(pubkey: Pubkey) {
@@ -194,10 +313,13 @@ function deleteBalancesByPubkey(pubkeyId: number) {
 }
 
 // Export the functions
-module.exports = {
+export {
+    deleteSessionsByTopic,
+    storeSession,
+    getAllSessions,
     storePubkey,
     getAllPubkeys,
     updatePubkeyById,
     deletePubkeyById,
-    deleteBalancesByPubkey
+    deleteBalancesByPubkey,
 };

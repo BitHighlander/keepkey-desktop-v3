@@ -18,6 +18,57 @@ import { web3wallet } from './walletconnect/utils/WalletConnectUtil'
 import { EIP155_SIGNING_METHODS } from './walletconnect/data/EIP155Data'
 import { approveEIP155Request, rejectEIP155Request } from './walletconnect/utils/EIP155RequestHandlerUtil'
 //end WC
+class FakeLocalStorage {
+  constructor() {
+    this.storage = {};
+  }
+
+  getItem(key) {
+    console.log("get: ",key)
+    return this.storage[key];
+  }
+
+  setItem(key, value) {
+    console.log("setItem: ",key)
+    console.log("setItem: ",value)
+    this.storage[key] = value;
+  }
+
+  removeItem(key) {
+    delete this.storage[key];
+  }
+
+  clear() {
+    this.storage = {};
+  }
+}
+global.localStorage = new FakeLocalStorage();
+
+/*
+      HDwallet
+ */
+import * as core from "@shapeshiftoss/hdwallet-core";
+import * as keepkey from "@shapeshiftoss/hdwallet-keepkey";
+import { NodeWebUSBKeepKeyAdapter } from '@shapeshiftoss/hdwallet-keepkey-nodewebusb'
+// import * as native from "@shapeshiftoss/hdwallet-native";
+const keyring = new core.Keyring();
+let KEEPKEY_WALLET:any = null
+
+/*
+Database
+ */
+import {
+  storeSession,
+  getAllSessions,
+  deleteSessionsByTopic,
+  storePubkey,
+  getAllPubkeys,
+  updatePubkeyById,
+  deletePubkeyById,
+  deleteBalancesByPubkey,
+} from './database';
+
+
 
 // The built directory structure
 //
@@ -155,8 +206,78 @@ ipcMain.handle('open-win', (_, arg) => {
 ipcMain.on('onStart', async (event, message) => {
   try{
     console.log("STARTING UP")
-    const initialized = await initializeWallets(event)
-    useWalletConnectEventsManager(initialized, event)
+
+    //connect to device
+    const webUsbAdapter = await NodeWebUSBKeepKeyAdapter.useKeyring(keyring)
+    const webUsbDevice = await webUsbAdapter.getDevice().catch(() => undefined)
+    if (webUsbDevice) {
+      // this line throws the error if the device does not support webUsb
+      const webUsbWallet = await webUsbAdapter.pairRawDevice(webUsbDevice)
+      KEEPKEY_WALLET = webUsbWallet
+      let wallets = [KEEPKEY_WALLET]
+      const initialized = await initializeWallets(event,wallets)
+      useWalletConnectEventsManager(true, event)
+
+      let pairing = await web3wallet.engine.init()
+      console.log("pairing: ",pairing)
+
+      //get sessions from the server
+      let allSessions = await web3wallet.engine.getActiveSessions()
+      console.log("allSessions: ",allSessions)
+
+      //get sessions from database
+      // let allSessions = await getAllSessions()
+      // console.log("allSessions: ",allSessions)
+      //
+      // //if there is a session, start it up
+      // if(allSessions.length > 0){
+      //   //restart it
+      //   for(let i = 0; i < allSessions.length; i++){
+      //     let session = allSessions[i]
+      //     //get the topic
+      //     let topic = session.sessionData.topic
+      //     console.log("topic: ",topic)
+      //     try{
+      //       //attempt to reconnect
+      //       // Reactivate the session then extend it - await is required to ensure execution order
+      //       await web3wallet.core.pairing.activate({ topic })
+      //       await web3wallet.extendSession({ topic })
+      //     }catch(e){
+      //       console.error("session expired: ",e)
+      //       //delete from sessions DB
+      //       deleteSessionsByTopic(topic)
+      //     }
+      //
+      //
+      //     // let uri = session.sessionData.uri
+      //     // console.log("uri: ",uri)
+      //     // try{
+      //     //   //attempt to reconnect
+      //     //   let resultPair = await web3wallet.pair({ uri })
+      //     //   console.log("resultPair: ",resultPair)
+      //     // }catch(e){
+      //     //   console.error("session expired: ",e)
+      //     //   //delete from sessions DB
+      //     //   deleteSessionsByTopic(topic)
+      //     // }
+      //   }
+      // }
+
+      //pendingSessionProposals
+      let pendingSessionProposals = await web3wallet.getPendingSessionProposals()
+      console.log("pendingSessionProposals: ",pendingSessionProposals)
+
+      //getPendingSessionRequests
+      let getPendingSessionRequests = await web3wallet.getPendingSessionRequests()
+      console.log("getPendingSessionRequests: ",getPendingSessionRequests)
+
+      //getPendingAuthRequests
+      let getPendingAuthRequests = await web3wallet.getPendingAuthRequests()
+      console.log("getPendingSessionRequests: ",getPendingAuthRequests)
+
+    }else{
+      console.error("Failed to find a device!")
+    }
   }catch(e){
     console.error("e: ",e)
   }
@@ -165,7 +286,17 @@ ipcMain.on('onStart', async (event, message) => {
 ipcMain.on('approveSession', async (event, message) => {
   try{
     console.log("approveSession", message)
-    await web3wallet.approveSession(message)
+    let pairingCode = message.pairingCode
+    console.log("pairingCode", pairingCode)
+    let result = await web3wallet.approveSession(message)
+    console.log("result", result)
+    result.uri = pairingCode
+    //@ts-ignore
+    await storeSession(result)
+    //save session into db?
+    //mark expiration time
+    //save into local sessions
+
   }catch(e){
     console.error("e: ",e)
   }
@@ -200,7 +331,7 @@ ipcMain.on('approveSessionRequest', async (event, message) => {
       case EIP155_SIGNING_METHODS.ETH_SIGN_TYPED_DATA_V4:
       case EIP155_SIGNING_METHODS.ETH_SEND_TRANSACTION:
       case EIP155_SIGNING_METHODS.ETH_SIGN_TRANSACTION:
-        const response = await approveEIP155Request(message.requestEvent)
+        const response = await approveEIP155Request(message.requestEvent, KEEPKEY_WALLET)
         console.log("response: ",response)
         await web3wallet.respondSessionRequest({
           topic,
