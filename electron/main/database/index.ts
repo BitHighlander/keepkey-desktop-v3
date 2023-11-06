@@ -136,7 +136,84 @@ db.serialize(() => {
         sessionData TEXT NOT NULL
       )
     `);
+
+    db.run(`
+    CREATE TABLE IF NOT EXISTS key_value_store (
+        key TEXT PRIMARY KEY,
+        value TEXT NOT NULL
+    )
+`);
+
 });
+
+//keystore
+// Function to store a key-value pair
+function setItem(key, value) {
+    return new Promise((resolve, reject) => {
+        db.run(
+            'INSERT OR REPLACE INTO key_value_store (key, value) VALUES (?, ?)',
+            [key, JSON.stringify(value)],
+            function (err) {
+                if (err) {
+                    console.error('Error storing key-value pair:', err.message);
+                    reject(err);
+                } else {
+                    console.log('Key-value pair stored successfully');
+                    resolve();
+                }
+            }
+        );
+    });
+}
+
+// Function to retrieve a value by key
+function getItem(key) {
+    return new Promise((resolve, reject) => {
+        db.get('SELECT value FROM key_value_store WHERE key = ?', [key], function (err, row) {
+            if (err) {
+                console.error('Error retrieving value by key:', err.message);
+                reject(err);
+            } else if (row) {
+                resolve(JSON.parse(row.value));
+            } else {
+                resolve(null);
+            }
+        });
+    });
+}
+
+// Function to delete a key-value pair by key
+function removeItem(key) {
+    return new Promise((resolve, reject) => {
+        db.run('DELETE FROM key_value_store WHERE key = ?', [key], function (err) {
+            if (err) {
+                console.error('Error deleting key-value pair by key:', err.message);
+                reject(err);
+            } else {
+                console.log('Key-value pair deleted successfully');
+                resolve();
+            }
+        });
+    });
+}
+
+// Function to retrieve all key-value pairs
+function getAllItems() {
+    return new Promise((resolve, reject) => {
+        db.all('SELECT key, value FROM key_value_store', [], function (err, rows) {
+            if (err) {
+                console.error('Error retrieving all key-value pairs:', err.message);
+                reject(err);
+            } else {
+                const result = {};
+                rows.forEach(row => {
+                    result[row.key] = JSON.parse(row.value);
+                });
+                resolve(result);
+            }
+        });
+    });
+}
 
 // export interface Session {
 //     id?: number; // Optional ID field for database storage
@@ -314,6 +391,10 @@ function deleteBalancesByPubkey(pubkeyId: number) {
 
 // Export the functions
 export {
+    setItem,
+    getItem,
+    removeItem,
+    getAllItems,
     deleteSessionsByTopic,
     storeSession,
     getAllSessions,

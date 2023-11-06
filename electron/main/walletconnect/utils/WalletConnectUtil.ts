@@ -1,11 +1,46 @@
 import { Web3Wallet, IWeb3Wallet } from '@walletconnect/web3wallet'
 import { Core } from '@walletconnect/core'
+import {
+  setItem,
+  getItem,
+  removeItem,
+  getAllItems } from '../../database'
+
 export let web3wallet: IWeb3Wallet
 
 export async function createWeb3Wallet(relayerRegionURL: string) {
+
+  //end WC
+  class FakeLocalStorage {
+    constructor() {
+      this.storage = {};
+    }
+
+    getItem(key) {
+      console.log("get: ",key)
+      return getItem[key];
+    }
+
+    setItem(key, value) {
+      console.log("setItem: ",key)
+      console.log("setItem: ",value)
+      setItem(key, value);
+    }
+
+    removeItem(key) {
+      removeItem(key);
+    }
+
+    clear() {
+      this.storage = {};
+    }
+  }
+  let localStorage = new FakeLocalStorage();
+
   const core = new Core({
     projectId: "14d36ca1bc76a70273d44d384e8475ae",
-    relayUrl: relayerRegionURL ?? process.env.NEXT_PUBLIC_RELAY_URL
+    relayUrl: relayerRegionURL ?? process.env.NEXT_PUBLIC_RELAY_URL,
+    storage:localStorage
   })
   web3wallet = await Web3Wallet.init({
     core,

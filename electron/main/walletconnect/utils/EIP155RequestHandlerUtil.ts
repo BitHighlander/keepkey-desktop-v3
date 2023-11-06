@@ -10,6 +10,11 @@ import { SignClientTypes } from '@walletconnect/types'
 import { getSdkError } from '@walletconnect/utils'
 import { ethers } from 'ethers'
 type RequestEventArgs = Omit<SignClientTypes.EventArguments['session_request'], 'verifyContext'>
+
+const strip0x = (inputHexString: string) =>
+    inputHexString.startsWith('0x') ? inputHexString.slice(2, inputHexString.length) : inputHexString
+
+
 export async function approveEIP155Request(requestEvent: RequestEventArgs, wallet:any) {
   const { params, id } = requestEvent
   const { chainId, request } = params
@@ -21,11 +26,15 @@ export async function approveEIP155Request(requestEvent: RequestEventArgs, walle
     case EIP155_SIGNING_METHODS.PERSONAL_SIGN:
     case EIP155_SIGNING_METHODS.ETH_SIGN:
       try {
-        const message = getSignParamsMessage(request.params)
+        // const message = getSignParamsMessage(request.params)
+        let message = Buffer.from(strip0x(request.params[0]), 'hex').toString('utf8')
+        console.log("request.params: ", request.params)
         console.log("message: ", message)
-        const signedMessage = await wallet.signMessage({
-          typedData,
-          addressNList: hardenedPath.concat(relPath),
+        message = Buffer.from(message.replace(/^0x/, ''), 'hex').toString()
+        console.log("message: ", message)
+        const signedMessage = await wallet.ethSignMessage({
+          message,
+          addressNList,
         })
         return formatJsonRpcResult(id, signedMessage)
 
@@ -33,7 +42,7 @@ export async function approveEIP155Request(requestEvent: RequestEventArgs, walle
         // return formatJsonRpcResult(id, signedMessage)
       } catch (error: any) {
         console.error(error)
-        alert(error.message)
+        //alert(error.message)
         return formatJsonRpcError(id, error.message)
       }
 

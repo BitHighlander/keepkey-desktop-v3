@@ -8,7 +8,11 @@ import { app, BrowserWindow, shell, ipcMain } from 'electron'
 import { release } from 'node:os'
 import { join } from 'node:path'
 import { update } from './update'
-
+import {
+  setItem,
+  getItem,
+  removeItem,
+  getAllItems } from './database'
 /*
   Wallet Connect
  */
@@ -17,32 +21,7 @@ import useWalletConnectEventsManager from './walletconnect/events'
 import { web3wallet } from './walletconnect/utils/WalletConnectUtil'
 import { EIP155_SIGNING_METHODS } from './walletconnect/data/EIP155Data'
 import { approveEIP155Request, rejectEIP155Request } from './walletconnect/utils/EIP155RequestHandlerUtil'
-//end WC
-class FakeLocalStorage {
-  constructor() {
-    this.storage = {};
-  }
 
-  getItem(key) {
-    console.log("get: ",key)
-    return this.storage[key];
-  }
-
-  setItem(key, value) {
-    console.log("setItem: ",key)
-    console.log("setItem: ",value)
-    this.storage[key] = value;
-  }
-
-  removeItem(key) {
-    delete this.storage[key];
-  }
-
-  clear() {
-    this.storage = {};
-  }
-}
-global.localStorage = new FakeLocalStorage();
 
 /*
       HDwallet
@@ -215,6 +194,7 @@ ipcMain.on('onStart', async (event, message) => {
       const webUsbWallet = await webUsbAdapter.pairRawDevice(webUsbDevice)
       KEEPKEY_WALLET = webUsbWallet
       let wallets = [KEEPKEY_WALLET]
+
       const initialized = await initializeWallets(event,wallets)
       useWalletConnectEventsManager(true, event)
 
@@ -224,6 +204,9 @@ ipcMain.on('onStart', async (event, message) => {
       //get sessions from the server
       let allSessions = await web3wallet.engine.getActiveSessions()
       console.log("allSessions: ",allSessions)
+
+      let allItems = await getAllItems()
+      console.log("allItems: ",allItems)
 
       //get sessions from database
       // let allSessions = await getAllSessions()
