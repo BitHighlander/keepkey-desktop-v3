@@ -1,0 +1,12 @@
+{
+  "entryFile": "electron/main/server/index.ts",
+  "noImplicitAdditionalProperties": "throw-on-extras",
+  "controllerPathGlobs": ["electron/main/server/controllers/**/*Controller.ts"],
+  "spec": {
+    "outputDirectory": "electron/main/server/spec",
+    "specVersion": 3
+  },
+  "routes": {
+    "routesDir": "electron/main/server/routes"
+  }
+}

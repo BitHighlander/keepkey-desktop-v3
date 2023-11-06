@@ -22,7 +22,6 @@ import { web3wallet } from './walletconnect/utils/WalletConnectUtil'
 import { EIP155_SIGNING_METHODS } from './walletconnect/data/EIP155Data'
 import { approveEIP155Request, rejectEIP155Request } from './walletconnect/utils/EIP155RequestHandlerUtil'
 
-
 /*
       HDwallet
  */
@@ -47,7 +46,10 @@ import {
   deleteBalancesByPubkey,
 } from './database';
 
-
+/*
+Server
+ */
+import { startServer } from 'electron/main/server'
 
 // The built directory structure
 //
@@ -170,16 +172,16 @@ ipcMain.handle('open-win', (_, arg) => {
 
  */
 
-// let onStart = async function(){
-//   try{
-//     console.log("STARTING UP")
-//     const initialized = await initializeWallets()
-//
-//   }catch(e){
-//     console.error(e)
-//   }
-// }
-// onStart()
+let onStart = async function(){
+  try{
+    console.log("STARTING UP (backend)")
+    //startServer()
+
+  }catch(e){
+    console.error(e)
+  }
+}
+onStart()
 
 //perform_skill_by_id
 ipcMain.on('onStart', async (event, message) => {
@@ -199,14 +201,14 @@ ipcMain.on('onStart', async (event, message) => {
       useWalletConnectEventsManager(true, event)
 
       let pairing = await web3wallet.engine.init()
-      console.log("pairing: ",pairing)
+      //console.log("pairing: ",pairing)
 
       //get sessions from the server
       let allSessions = await web3wallet.engine.getActiveSessions()
-      console.log("allSessions: ",allSessions)
+      //console.log("allSessions: ",allSessions)
 
       let allItems = await getAllItems()
-      console.log("allItems: ",allItems)
+      //console.log("allItems: ",allItems)
 
       //get sessions from database
       // let allSessions = await getAllSessions()
@@ -248,15 +250,15 @@ ipcMain.on('onStart', async (event, message) => {
 
       //pendingSessionProposals
       let pendingSessionProposals = await web3wallet.getPendingSessionProposals()
-      console.log("pendingSessionProposals: ",pendingSessionProposals)
+      //console.log("pendingSessionProposals: ",pendingSessionProposals)
 
       //getPendingSessionRequests
       let getPendingSessionRequests = await web3wallet.getPendingSessionRequests()
-      console.log("getPendingSessionRequests: ",getPendingSessionRequests)
+      //console.log("getPendingSessionRequests: ",getPendingSessionRequests)
 
       //getPendingAuthRequests
       let getPendingAuthRequests = await web3wallet.getPendingAuthRequests()
-      console.log("getPendingSessionRequests: ",getPendingAuthRequests)
+      //console.log("getPendingSessionRequests: ",getPendingAuthRequests)
 
     }else{
       console.error("Failed to find a device!")
