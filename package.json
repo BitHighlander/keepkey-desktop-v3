@@ -31,6 +31,9 @@
     "@kadena/cryptography-utils": "^0.4.0",
     "@multiversx/sdk-core": "^12.11.0",
     "@multiversx/sdk-wallet": "^4.2.0",
+    "@pioneer-platform/pioneer-caip": "^8.1.81",
+    "@pioneer-platform/pioneer-client": "^9.0.19",
+    "@pioneer-sdk/sdk": "^1.2.4",
     "@polkadot/keyring": "^12.5.1",
     "@polkadot/types": "^10.10.1",
     "@polkadot/util-crypto": "^12.5.1",
@@ -41,6 +44,7 @@
     "@solana/web3.js": "^1.87.3",
     "@taquito/signer": "^17.3.2",
     "@taquito/taquito": "^17.3.2",
+    "@types/node": "^20.8.10",
     "@walletconnect/core": "^2.10.4",
     "@walletconnect/utils": "^2.10.4",
     "@walletconnect/web3wallet": "^1.9.3",
@@ -54,6 +58,7 @@
     "dotenv": "^16.3.1",
     "electron-updater": "^6.1.4",
     "ethers": "^5.0.9",
+    "express": "^4.18.2",
     "framer-motion": "^10.16.4",
     "lokijs": "^1.5.12",
     "long": "^5.2.3",
@@ -64,7 +69,8 @@
     "solana-wallet": "^1.0.2",
     "sqlite3": "^5.1.6",
     "tronweb": "^5.3.1",
-    "tslib": "^2.6.2"
+    "tslib": "^2.6.2",
+    "uuid": "^9.0.1"
   },
   "devDependencies": {
     "@playwright/test": "^1.39.0",
